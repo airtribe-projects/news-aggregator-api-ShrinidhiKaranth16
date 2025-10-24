@@ -2,6 +2,9 @@ const tap = require('tap');
 const supertest = require('supertest');
 const app = require('../app');
 const server = supertest(app);
+const connectDB = require('../config/db');
+const mongoose = require('mongoose');
+const User = require('../src/models/user');
 
 const mockUser = {
     name: 'Clark Kent',
@@ -11,6 +14,16 @@ const mockUser = {
 };
 
 let token = '';
+
+
+tap.before(async () => {
+  await connectDB();
+  await User.deleteMany();
+});
+
+tap.teardown(async () => {
+  await mongoose.connection.close(); 
+});
 
 // Auth tests
 
@@ -79,7 +92,7 @@ tap.test('Check PUT /users/preferences', async (t) => {
     t.end();
 });
 
-// News tests
+// // News tests
 
 tap.test('GET /news', async (t) => {
     const response = await server.get('/news').set('Authorization', `Bearer ${token}`);
